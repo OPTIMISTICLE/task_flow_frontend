@@ -1,0 +1,262 @@
+.back-link {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+.page-heading {
+  margin-bottom: 30px;
+  padding-bottom: 18px;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-heading::after {
+  content: '';
+  width: 150px;
+  height: 2px;
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  background: var(--primary);
+}
+
+.page-heading h1 {
+  margin: 8px 0;
+  font-size: clamp(34px, 4vw, 46px);
+  letter-spacing: -0.045em;
+}
+
+.page-heading > p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.form-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'alert alert'
+    'details assignment'
+    'details attachment'
+    'footer footer';
+  overflow: hidden;
+  background: var(--panel-texture);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.alert {
+  grid-area: alert;
+  margin: 22px 24px 0;
+}
+
+.text-button {
+  display: block;
+  margin-top: 8px;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.form-section {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-content: start;
+  gap: 12px 14px;
+  padding: 28px;
+}
+
+.task-details-section {
+  grid-area: details;
+  border-right: 1px solid var(--border);
+}
+
+.assignment-section {
+  grid-area: assignment;
+  border-bottom: 1px solid var(--border);
+}
+
+.attachment-section {
+  grid-area: attachment;
+}
+
+.section-number {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: var(--primary-contrast);
+  background: linear-gradient(145deg, var(--primary-hover), var(--primary));
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.section-copy {
+  align-self: center;
+}
+
+.section-copy h2 {
+  margin: 0 0 5px;
+  font-size: 18px;
+}
+
+.section-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.fields {
+  min-width: 0;
+  grid-column: 1 / -1;
+  padding-top: 10px;
+}
+
+.fields label:not(.file-picker) {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.fields label b {
+  color: var(--danger);
+}
+
+.fields input,
+.fields textarea,
+.fields select {
+  width: 100%;
+}
+
+.fields textarea {
+  min-height: 170px;
+  resize: vertical;
+}
+
+.fields label:not(:first-child) {
+  margin-top: 20px;
+}
+
+.hint {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.two-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.two-columns label:not(:first-child) {
+  margin-top: 0;
+}
+
+.file-picker {
+  min-height: 156px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  padding: 20px;
+  text-align: center;
+  border: 1px dashed color-mix(in srgb, var(--primary) 72%, var(--border-strong));
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.file-picker:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.file-picker span {
+  display: grid;
+  gap: 4px;
+}
+
+.file-picker small {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.file-icon {
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 50%;
+  font-size: 22px;
+}
+
+footer {
+  grid-area: footer;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px 28px;
+  background: var(--surface-muted);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 900px) {
+  .form-card {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'alert'
+      'details'
+      'assignment'
+      'attachment'
+      'footer';
+  }
+
+  .task-details-section {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .fields textarea {
+    min-height: 140px;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-section {
+    grid-template-columns: 38px 1fr;
+    padding: 22px;
+  }
+
+  footer {
+    padding: 18px 22px;
+    flex-direction: column-reverse;
+  }
+
+  footer a,
+  footer button {
+    width: 100%;
+    text-align: center;
+  }
+}

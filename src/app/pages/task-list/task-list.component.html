@@ -1,0 +1,77 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">{{ auth.isManager() ? 'Team overview' : 'My workspace' }}</p>
+    <h1>{{ auth.isManager() ? 'Managed tasks' : 'Assigned tasks' }}</h1>
+    <p>{{ auth.isManager() ? 'Create assignments and follow their progress.' : 'See what matters, start work, and mark it done.' }}</p>
+  </div>
+  @if (auth.isManager()) {
+    <a class="primary-button" routerLink="/tasks/new">+ Create task</a>
+  }
+</section>
+
+<section class="stats" aria-label="Task summary">
+  <article><span class="stat-icon all">◆</span><div><strong>{{ tasks().length }}</strong><small>Total tasks</small></div></article>
+  <article><span class="stat-icon progress">●</span><div><strong>{{ activeCount() }}</strong><small>In progress</small></div></article>
+  <article><span class="stat-icon overdue">!</span><div><strong>{{ overdueCount() }}</strong><small>Overdue</small></div></article>
+  <article><span class="stat-icon complete">✓</span><div><strong>{{ completedCount() }}</strong><small>Completed</small></div></article>
+</section>
+
+<section class="task-section">
+  <div class="section-tools">
+    <div>
+      <h2>Tasks</h2>
+      <small>{{ filteredTasks().length }} result{{ filteredTasks().length === 1 ? '' : 's' }}</small>
+    </div>
+    <label class="filter-control">
+      <span>Status</span>
+      <select #statusFilter [value]="filter()" (change)="setFilter(statusFilter.value)">
+        <option value="">All statuses</option>
+        <option value="ASSIGNED">Assigned</option>
+        <option value="IN_PROGRESS">In progress</option>
+        <option value="OVERDUE">Overdue</option>
+        <option value="COMPLETED">Completed</option>
+      </select>
+    </label>
+  </div>
+
+  @if (error()) { <div class="alert error" role="alert">{{ error() }}</div> }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner"></span> Loading tasks…</div>
+  } @else if (filteredTasks().length === 0) {
+    <div class="empty-state">
+      <span>✓</span>
+      <h3>No tasks here</h3>
+      <p>{{ filter() ? 'No task matches this status.' : (auth.isManager() ? 'Create the first task for your team.' : 'You have no assigned work yet.') }}</p>
+    </div>
+  } @else {
+    <div class="task-list">
+      @for (task of filteredTasks(); track task.id) {
+        <article class="task-card">
+          <div class="task-status-line" [class]="statusClass(task.effectiveStatus)"></div>
+          <div class="task-main">
+            <div class="task-topline">
+              <span class="status-badge" [class]="statusClass(task.effectiveStatus)">{{ statusLabel(task.effectiveStatus) }}</span>
+              @if (task.attachments.length) { <span class="attachment-count">↗ {{ task.attachments.length }}</span> }
+            </div>
+            <a class="task-title" [routerLink]="['/tasks', task.id]">{{ task.title }}</a>
+            <p>{{ task.description || 'No description provided.' }}</p>
+            <div class="task-meta">
+              <span><b>{{ auth.isManager() ? 'Assigned to' : 'Created by' }}</b> {{ auth.isManager() ? task.assignee.displayName : task.creator.displayName }}</span>
+              <span><b>Due</b> {{ task.dueDate ? (task.dueDate | date:'medium') : 'No deadline' }}</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <a class="secondary-button" [routerLink]="['/tasks', task.id]">View</a>
+            @if (!auth.isManager() && task.progressStatus === 'ASSIGNED') {
+              <button class="primary-button" type="button" (click)="updateStatus(task, 'IN_PROGRESS')" [disabled]="updatingId() === task.id">Start</button>
+            }
+            @if (!auth.isManager() && task.progressStatus !== 'COMPLETED') {
+              <button class="success-button" type="button" (click)="updateStatus(task, 'COMPLETED')" [disabled]="updatingId() === task.id">Complete</button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

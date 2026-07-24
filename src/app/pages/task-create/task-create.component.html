@@ -1,0 +1,108 @@
+<a class="back-link" routerLink="/tasks">← Back to tasks</a>
+
+<section class="page-heading">
+  <p class="eyebrow">Manager action</p>
+  <h1>Create a task</h1>
+  <p>Define the expected work, select the owner, and add a deadline when it matters.</p>
+</section>
+
+<form class="form-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (error()) {
+    <div class="alert error" role="alert">
+      {{ error() }}
+      @if (createdTaskId()) {
+        <button type="button" class="text-button" (click)="openCreatedTask()">
+          Open the created task
+        </button>
+      }
+    </div>
+  }
+
+  <div class="form-section task-details-section">
+    <span class="section-number">01</span>
+    <div class="section-copy">
+      <h2>Task details</h2>
+      <p>Describe a clear, actionable outcome.</p>
+    </div>
+    <div class="fields">
+      <label for="title">Title <b>*</b></label>
+      <input
+        id="title"
+        formControlName="title"
+        maxlength="160"
+        placeholder="Example: Prepare the weekly operations report"
+      />
+      @if (form.controls.title.touched && form.controls.title.invalid) {
+        <small class="field-error">A title of no more than 160 characters is required.</small>
+      }
+
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        maxlength="4000"
+        rows="6"
+        placeholder="Add the context, expected result, and useful instructions."
+      ></textarea>
+      <small class="hint">{{ form.controls.description.value.length }}/4000 characters</small>
+    </div>
+  </div>
+
+  <div class="form-section assignment-section">
+    <span class="section-number">02</span>
+    <div class="section-copy">
+      <h2>Assignment</h2>
+      <p>Choose the worker responsible for completion.</p>
+    </div>
+    <div class="fields two-columns">
+      <div>
+        <label for="assignee">Worker <b>*</b></label>
+        <select id="assignee" formControlName="assigneeId">
+          <option value="" disabled>
+            {{ loadingWorkers() ? 'Loading workers…' : 'Select a worker' }}
+          </option>
+          @for (worker of workers(); track worker.id) {
+            <option [value]="worker.id">{{ worker.displayName }} — {{ worker.email }}</option>
+          }
+        </select>
+        @if (form.controls.assigneeId.touched && form.controls.assigneeId.invalid) {
+          <small class="field-error">Select a worker.</small>
+        }
+      </div>
+      <div>
+        <label for="dueDate">Deadline</label>
+        <input id="dueDate" type="datetime-local" formControlName="dueDate" [min]="minDueDate" />
+        <small class="hint">Optional. Times use your local timezone.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section attachment-section">
+    <span class="section-number">03</span>
+    <div class="section-copy">
+      <h2>Attachment</h2>
+      <p>Add a supporting artifact if needed.</p>
+    </div>
+    <div class="fields">
+      <label class="file-picker" for="attachment">
+        <span class="file-icon">↥</span>
+        <span
+          ><strong>{{ selectedFile()?.name || 'Choose a file' }}</strong
+          ><small>Maximum configured upload size: 10 MB</small></span
+        >
+      </label>
+      <input id="attachment" class="visually-hidden" type="file" (change)="chooseFile($event)" />
+    </div>
+  </div>
+
+  <footer>
+    <a class="secondary-button" routerLink="/tasks">Cancel</a>
+    <button
+      class="primary-button"
+      type="submit"
+      [disabled]="submitting() || loadingWorkers() || !!createdTaskId()"
+    >
+      {{ submitting() ? 'Creating task…' : 'Create and assign task' }}
+    </button>
+  </footer>
+</form>

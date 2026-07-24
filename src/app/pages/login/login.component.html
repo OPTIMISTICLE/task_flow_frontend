@@ -1,0 +1,62 @@
+<div class="login-page">
+  <section class="welcome-panel">
+    <div class="mini-brand"><span>TF</span> TaskFlow</div>
+    <div class="welcome-copy">
+      <p class="eyebrow">Focused work, visible progress</p>
+      <h1>Turn assignments into finished work.</h1>
+      <p>Managers assign and follow. Workers focus and complete. Everyone sees the same truth.</p>
+    </div>
+    <div class="flow-preview" aria-hidden="true">
+      <span>Assigned</span><i></i><span>In progress</span><i></i><span>Completed</span>
+    </div>
+  </section>
+
+  <main class="login-panel">
+    <app-theme-toggle class="login-theme-toggle" />
+    <form (ngSubmit)="submit()" [formGroup]="form" novalidate>
+      <p class="eyebrow">Welcome back</p>
+      <h2>Sign in to your workspace</h2>
+      <p class="form-intro">Use one of the preloaded company accounts.</p>
+
+      @if (error()) {
+        <div class="alert error" role="alert">{{ error() }}</div>
+      }
+
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        autocomplete="username"
+        placeholder="you@company.local"
+      />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <small class="field-error">Enter a valid email address.</small>
+      }
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        placeholder="Your password"
+      />
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <small class="field-error">Password is required.</small>
+      }
+
+      <button class="primary-button full" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Signing in…' : 'Sign in' }}
+      </button>
+
+      <div class="demo-accounts">
+        <strong>Demo accounts</strong>
+        <span>manager&#64;company.local</span>
+        <span>worker1&#64;company.local</span>
+        <span>worker2&#64;company.local</span>
+        <small>All use the password supplied through <code>SEED_PASSWORD</code>.</small>
+      </div>
+    </form>
+  </main>
+</div>

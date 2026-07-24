@@ -1,0 +1,63 @@
+<a class="back-link" routerLink="/tasks">← Back to tasks</a>
+
+@if (error()) { <div class="alert error" role="alert">{{ error() }}</div> }
+
+@if (loading()) {
+  <div class="loading-state"><span class="spinner"></span> Loading task…</div>
+} @else if (task(); as currentTask) {
+  <section class="detail-heading">
+    <div>
+      <span class="status-badge" [class]="statusClass(currentTask.effectiveStatus)">{{ statusLabel(currentTask.effectiveStatus) }}</span>
+      <h1>{{ currentTask.title }}</h1>
+      <p>Created {{ currentTask.createdAt | date:'medium' }} by {{ currentTask.creator.displayName }}</p>
+    </div>
+    @if (!auth.isManager() && currentTask.progressStatus !== 'COMPLETED') {
+      <div class="heading-actions">
+        @if (currentTask.progressStatus === 'ASSIGNED') {
+          <button class="secondary-button" type="button" (click)="updateStatus('IN_PROGRESS')" [disabled]="working()">Start task</button>
+        }
+        <button class="success-button" type="button" (click)="updateStatus('COMPLETED')" [disabled]="working()">Mark completed</button>
+      </div>
+    }
+  </section>
+
+  <div class="detail-grid">
+    <section class="content-card">
+      <div class="card-heading"><span>01</span><h2>Description</h2></div>
+      <p class="description">{{ currentTask.description || 'No description was provided for this task.' }}</p>
+    </section>
+
+    <aside class="meta-card">
+      <h2>Task information</h2>
+      <dl>
+        <div><dt>Assigned to</dt><dd>{{ currentTask.assignee.displayName }}<small>{{ currentTask.assignee.email }}</small></dd></div>
+        <div><dt>Deadline</dt><dd [class.overdue-text]="currentTask.effectiveStatus === 'OVERDUE'">{{ currentTask.dueDate ? (currentTask.dueDate | date:'medium') : 'No deadline' }}</dd></div>
+        <div><dt>Last updated</dt><dd>{{ currentTask.updatedAt | date:'medium' }}</dd></div>
+        @if (currentTask.completedAt) { <div><dt>Completed</dt><dd>{{ currentTask.completedAt | date:'medium' }}</dd></div> }
+      </dl>
+    </aside>
+
+    <section class="content-card attachments-card">
+      <div class="card-heading"><span>02</span><div><h2>Attachments</h2><small>{{ currentTask.attachments.length }} file{{ currentTask.attachments.length === 1 ? '' : 's' }}</small></div></div>
+      @if (currentTask.attachments.length) {
+        <div class="attachment-list">
+          @for (attachment of currentTask.attachments; track attachment.id) {
+            <div class="attachment-row">
+              <span class="file-type">{{ attachment.originalName.split('.').pop()?.slice(0, 4)?.toUpperCase() || 'FILE' }}</span>
+              <div><strong>{{ attachment.originalName }}</strong><small>{{ formatBytes(attachment.sizeBytes) }} · {{ attachment.uploadedBy }} · {{ attachment.uploadedAt | date:'short' }}</small></div>
+              <button class="secondary-button" type="button" (click)="download(attachment.downloadUrl, attachment.originalName)">Download</button>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="muted">No attachment has been added.</p>
+      }
+
+      <div class="upload-row">
+        <label for="detailFile" class="file-choice">{{ selectedFile()?.name || 'Choose a file' }}</label>
+        <input id="detailFile" class="visually-hidden" type="file" (change)="chooseFile($event)" />
+        <button class="primary-button" type="button" (click)="upload()" [disabled]="!selectedFile() || working()">Upload</button>
+      </div>
+    </section>
+  </div>
+}

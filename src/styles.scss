@@ -1,0 +1,389 @@
+:root,
+html[data-theme='light'] {
+  --primary: #9a711d;
+  --primary-hover: #7c5713;
+  --primary-contrast: #171208;
+  --primary-soft: #f6e9c7;
+  --ink: #1b1c20;
+  --ink-soft: #42444a;
+  --muted: #73747a;
+  --surface: #f3f0e8;
+  --surface-elevated: #fffdf8;
+  --surface-muted: #f8f4eb;
+  --surface-hover: #fbf5e8;
+  --field-background: #ffffff;
+  --header-background: rgba(255, 253, 248, 0.9);
+  --border: #e2dccf;
+  --border-strong: #cfc5b1;
+  --danger: #b93d37;
+  --success: #16764c;
+  --focus-ring: rgba(154, 113, 29, 0.22);
+  --assigned-background: #f4e5bb;
+  --assigned-text: #77530f;
+  --progress-background: #e1ecff;
+  --progress-text: #315e9b;
+  --overdue-background: #fbe1de;
+  --overdue-text: #aa3833;
+  --completed-background: #dcefe4;
+  --completed-text: #226f4b;
+  --calendar-filter: none;
+  --body-background:
+    radial-gradient(circle at 16% 4%, rgba(221, 190, 112, 0.13), transparent 30%),
+    linear-gradient(180deg, #faf8f2 0%, #f0ede5 100%);
+  --panel-texture:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7), transparent 42%), var(--surface-elevated);
+  --radius: 16px;
+  --radius-sm: 11px;
+  --shadow-xs: 0 4px 16px rgba(47, 38, 20, 0.06);
+  --shadow-sm: 0 16px 44px rgba(47, 38, 20, 0.08);
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  --primary: #dfbd63;
+  --primary-hover: #efcf79;
+  --primary-contrast: #181307;
+  --primary-soft: rgba(223, 189, 99, 0.14);
+  --ink: #f6f4ef;
+  --ink-soft: #d1cec7;
+  --muted: #9c9da2;
+  --surface: #0b0d10;
+  --surface-elevated: #15181d;
+  --surface-muted: #1c2026;
+  --surface-hover: #1b1e23;
+  --field-background: #101318;
+  --header-background: rgba(13, 15, 18, 0.9);
+  --border: #2d3138;
+  --border-strong: #474b52;
+  --danger: #ff8f88;
+  --success: #68d39a;
+  --focus-ring: rgba(223, 189, 99, 0.24);
+  --assigned-background: rgba(210, 166, 50, 0.25);
+  --assigned-text: #f2d57f;
+  --progress-background: rgba(86, 139, 207, 0.2);
+  --progress-text: #9ec7ff;
+  --overdue-background: rgba(205, 77, 68, 0.2);
+  --overdue-text: #ff9b94;
+  --completed-background: rgba(59, 163, 105, 0.2);
+  --completed-text: #8be0b1;
+  --calendar-filter: invert(89%) sepia(29%) saturate(760%) hue-rotate(348deg) brightness(92%);
+  --body-background:
+    radial-gradient(circle at 15% 0%, rgba(214, 174, 74, 0.09), transparent 28%),
+    radial-gradient(circle at 92% 22%, rgba(214, 174, 74, 0.04), transparent 30%),
+    linear-gradient(180deg, #0c0e11 0%, #090b0e 100%);
+  --panel-texture:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.025), transparent 42%), var(--surface-elevated);
+  --shadow-xs: 0 5px 18px rgba(0, 0, 0, 0.22);
+  --shadow-sm: 0 20px 52px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
+:root {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--surface);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--ink);
+  background: var(--body-background);
+  background-attachment: fixed;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3,
+p {
+  overflow-wrap: break-word;
+}
+
+::selection {
+  color: var(--primary-contrast);
+  background: var(--primary);
+}
+
+input,
+select,
+textarea {
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  outline: none;
+  color: var(--ink);
+  background: var(--field-background);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.72;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border-color: var(--danger);
+}
+
+input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  filter: var(--calendar-filter);
+}
+
+.primary-button,
+.secondary-button,
+.success-button,
+.ghost-button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 780;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s,
+    opacity 0.2s;
+}
+
+.primary-button {
+  color: var(--primary-contrast);
+  background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+  box-shadow: 0 9px 24px rgba(179, 135, 35, 0.18);
+}
+
+.primary-button:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.secondary-button {
+  color: var(--ink-soft);
+  background: var(--surface-elevated);
+  border-color: var(--border-strong);
+}
+
+.secondary-button:hover:not(:disabled) {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.success-button {
+  color: var(--success);
+  background: var(--completed-background);
+  border-color: color-mix(in srgb, var(--success) 34%, transparent);
+}
+
+.success-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--completed-background) 78%, var(--success));
+}
+
+.ghost-button {
+  padding-inline: 10px;
+  color: var(--muted);
+  background: transparent;
+}
+
+.ghost-button:hover:not(:disabled) {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.success-button:focus-visible,
+.ghost-button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.54;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.status-badge {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 6px;
+  color: var(--assigned-text);
+  background: var(--assigned-background);
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+}
+
+.status-badge.status-in-progress {
+  color: var(--progress-text);
+  background: var(--progress-background);
+}
+
+.status-badge.status-overdue {
+  color: var(--overdue-text);
+  background: var(--overdue-background);
+}
+
+.status-badge.status-completed {
+  color: var(--completed-text);
+  background: var(--completed-background);
+}
+
+.alert {
+  padding: 13px 15px;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.alert.error {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 11%, var(--surface-elevated));
+  border: 1px solid color-mix(in srgb, var(--danger) 38%, transparent);
+}
+
+.field-error {
+  display: block;
+  margin-top: 6px;
+  color: var(--danger);
+  font-size: 11px;
+}
+
+.empty-state {
+  display: grid;
+  justify-items: center;
+  padding: 58px 20px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty-state > span {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-weight: 900;
+}
+
+.empty-state h3 {
+  margin: 16px 0 6px;
+  color: var(--ink);
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+code {
+  padding: 2px 5px;
+  border-radius: 5px;
+  color: var(--assigned-text);
+  background: var(--assigned-background);
+  font-size: 0.92em;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

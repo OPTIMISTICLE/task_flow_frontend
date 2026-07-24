@@ -1,0 +1,33 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" routerLink="/tasks" aria-label="TaskFlow home">
+      <span class="brand-mark">TF</span>
+      <span>TaskFlow</span>
+    </a>
+
+    <nav aria-label="Main navigation">
+      <a routerLink="/tasks" routerLinkActive="active">Tasks</a>
+      @if (auth.isManager()) {
+        <a routerLink="/tasks/new" routerLinkActive="active">Create task</a>
+      }
+    </nav>
+
+    <div class="account">
+      <app-theme-toggle />
+      <span class="avatar"
+        >{{ auth.user()?.firstName?.charAt(0) }}{{ auth.user()?.lastName?.charAt(0) }}</span
+      >
+      <span class="account-copy">
+        <strong>{{ auth.user()?.displayName }}</strong>
+        <small>{{ auth.user()?.role === 'MANAGER' ? 'Manager' : 'Worker' }}</small>
+      </span>
+      <button class="ghost-button" type="button" (click)="logout()" [disabled]="loggingOut()">
+        {{ loggingOut() ? 'Signing out…' : 'Sign out' }}
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <router-outlet />
+  </main>
+</div>
