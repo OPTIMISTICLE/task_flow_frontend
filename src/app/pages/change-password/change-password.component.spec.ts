@@ -18,7 +18,10 @@ describe('ChangePasswordComponent', () => {
     lastName: 'Administrator',
     displayName: 'Ada Administrator',
     role: 'ADMIN',
+    status: 'ACTIVE',
     mustChangePassword: false,
+    mfaEnabled: false,
+    sessionId: 'admin-session',
   };
   const auth = {
     mustChangePassword: signal(true),

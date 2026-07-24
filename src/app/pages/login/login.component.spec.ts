@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../../core/auth.service';
@@ -10,6 +10,7 @@ import { LoginComponent } from './login.component';
 describe('LoginComponent', () => {
   let fixture: ComponentFixture<LoginComponent>;
   let component: LoginComponent;
+  let router: Router;
 
   const manager: AuthUser = {
     id: 'manager-id',
@@ -18,34 +19,35 @@ describe('LoginComponent', () => {
     lastName: 'Manager',
     displayName: 'Maya Manager',
     role: 'MANAGER',
+    status: 'ACTIVE',
     mustChangePassword: false,
+    mfaEnabled: false,
+    sessionId: 'session-id',
   };
-  const auth = { login: vi.fn(), homeUrl: vi.fn() };
-  const router = { navigateByUrl: vi.fn() };
+  const auth = { login: vi.fn(), verifyMfa: vi.fn(), homeUrl: vi.fn() };
 
   beforeEach(async () => {
     auth.login.mockReset();
     auth.homeUrl.mockReset();
     auth.homeUrl.mockReturnValue('/tasks');
-    router.navigateByUrl.mockReset();
-    router.navigateByUrl.mockResolvedValue(true);
-
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
       providers: [
+        provideRouter([]),
         { provide: AuthService, useValue: auth },
-        { provide: Router, useValue: router },
       ],
     }).compileComponents();
 
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
-    component.form.setValue({ email: manager.email, password: 'TestPassword123!' });
+    component.form.patchValue({ email: manager.email, password: 'TestPassword123!' });
     fixture.detectChanges();
   });
 
   it('navigates to tasks after a successful login and clears the loading state', () => {
-    auth.login.mockReturnValue(of(manager));
+    auth.login.mockReturnValue(of({ state: 'AUTHENTICATED', user: manager }));
 
     component.submit();
 

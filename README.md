@@ -28,9 +28,12 @@ only authorization check.
 2. Enter your company email and password.
 3. Select **Sign in**.
 
-If the account has a bootstrap or administrator-generated temporary password, TaskFlow opens the
-password-change screen. Enter the temporary password, choose a new password of 15 to 200 characters,
-and confirm it. No task or administration page is available until this step is complete.
+New users receive an invitation email. Open its 24-hour link, choose a password of 15 to 200
+characters, and sign in. The bootstrap administrator is the only account that may be required to
+replace an initial password before using the rest of the application.
+
+If MFA is enabled, sign-in asks for a six-digit authenticator code. A previously saved recovery code
+can be used when the authenticator is unavailable. Each recovery code works once.
 
 Demo installations can provide these seeded accounts:
 
@@ -46,8 +49,13 @@ were enabled.
 
 Use **Sign out** in the top-right account area when finished.
 
-Any signed-in user can choose **Change password** from the navigation. Changing a password invalidates
-older sessions for that account, including sessions on other browsers.
+Use **Forgot your password?** to request a 30-minute recovery link. The response is deliberately the
+same whether or not an account exists. Any signed-in user can choose **Change password**; changing it
+signs out all older sessions.
+
+Use **Security** to enable or disable authenticator MFA, generate new recovery codes, inspect active
+12-hour sessions, revoke a device, or revoke every other session. Save recovery codes outside the
+browser when they are displayed; TaskFlow cannot show them again.
 
 ### Navigate the workspace
 
@@ -90,7 +98,7 @@ Managers monitor progress but do not change the worker's progress status.
 
 1. Select **Users** in the navigation.
 2. Search by name, email, job title, or department.
-3. Optionally filter by role or active state and move through the paged results.
+3. Optionally filter by role or Pending, Active, or Inactive state and move through the results.
 4. Select a user to edit their profile or review their audit timeline.
 
 The optional profile fields are job title, department, and phone number. Phone numbers must use E.164
@@ -101,16 +109,15 @@ format, such as `+14155552671`.
 1. Select **Create user**.
 2. Enter the user's name and company email, optional profile fields, and role.
 3. Save the account.
-4. Copy the generated temporary password from the one-time dialog and deliver it through an approved
-   private channel.
-
-The password cannot be viewed again. The new user must replace it at first sign-in.
+4. TaskFlow queues an invitation email. If delivery must be retried, open the user and select
+   **Resend invitation**; issuing a new link invalidates the previous one.
 
 #### Maintain an account
 
 From the user details page an administrator can update profile information, change a role when the
-account has no task or attachment history, reset another user's password, and deactivate or reactivate
-an account. Deactivation is blocked while a manager or worker has unfinished role-related tasks.
+account has no task or attachment history, send another user's password-recovery email, reset MFA and
+sessions, and deactivate or reactivate an account. Email changes require confirmation at the new
+address. Deactivation is blocked while a manager or worker has unfinished role-related tasks.
 
 For continuity and safety, administrators cannot deactivate, demote, or reset their own account, and
 the last active administrator cannot be changed or deactivated. Accounts are deactivated rather than
@@ -158,7 +165,8 @@ private keys, or unrelated sensitive information.
   administrator.
 - **Invalid email or password:** re-enter the credentials or request a password reset/change from the
   administrator.
-- **Password change required:** finish the password-change screen using the current temporary password.
+- **Invitation expired:** ask an administrator to resend the invitation.
+- **MFA code rejected:** wait for the next code and retry, or use one unused recovery code.
 - **Account changed since it was loaded:** refresh the user details before retrying the administrator
   action; another administrator changed it first.
 - **Role or deactivation blocked:** resolve the task-history or unfinished-work condition shown by the
@@ -194,10 +202,15 @@ the separate CSRF cookie and sends the corresponding header for protected mutati
 
 ### Main routes
 
-| Route              | Purpose                      | Access                       |
-| ------------------ | ---------------------------- | ---------------------------- |
-| `/login`           | Sign-in screen               | Public                       |
+| Route                 | Purpose                      | Access                       |
+| --------------------- | ---------------------------- | ---------------------------- |
+| `/login`              | Sign-in and MFA challenge    | Public                       |
+| `/forgot-password`    | Request account recovery     | Public                       |
+| `/accept-invitation`  | Accept an emailed invitation | Public token                 |
+| `/reset-password`     | Complete password recovery   | Public token                 |
+| `/confirm-email`      | Confirm a new email address  | Public token                 |
 | `/change-password` | Replace the current password | Authenticated                |
+| `/settings/security`  | MFA and session controls     | Authenticated                |
 | `/admin/users`     | Search and filter users      | Administrator                |
 | `/admin/users/new` | Create a user                | Administrator                |
 | `/admin/users/:id` | Edit and audit a user        | Administrator                |

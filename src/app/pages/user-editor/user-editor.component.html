@@ -7,14 +7,14 @@
     <p>
       {{
         isNew
-          ? 'Create a secured account with a one-time temporary password.'
+          ? 'Create an account and send a secure, expiring invitation.'
           : 'Update identity, access, and credentials.'
       }}
     </p>
   </div>
   @if (!isNew && user(); as currentUser) {
-    <span class="account-status" [class.inactive]="!currentUser.active">{{
-      currentUser.active ? 'Active' : 'Inactive'
+    <span class="account-status" [class.inactive]="currentUser.status === 'INACTIVE'">{{
+      currentUser.status === 'PENDING' ? 'Pending invitation' : currentUser.status === 'ACTIVE' ? 'Active' : 'Inactive'
     }}</span>
   }
 </section>
@@ -44,8 +44,11 @@
       </div>
       <label
         >Email <b>*</b
-        ><input type="email" formControlName="email" maxlength="254" autocomplete="off"
+      ><input type="email" formControlName="email" maxlength="254" autocomplete="off"
       /></label>
+      @if (user()?.pendingEmail) {
+        <small class="hint">Waiting for confirmation of {{ user()?.pendingEmail }}. The current sign-in email remains {{ user()?.email }}.</small>
+      }
 
       <div class="form-heading">
         <span>02</span>
@@ -104,8 +107,8 @@
               <dd>{{ currentUser.updatedAt | date: 'medium' }}</dd>
             </div>
             <div>
-              <dt>Credentials</dt>
-              <dd>{{ currentUser.mustChangePassword ? 'Temporary password' : 'Established' }}</dd>
+              <dt>Email</dt>
+              <dd>{{ currentUser.emailVerifiedAt ? 'Verified' : 'Awaiting verification' }}</dd>
             </div>
           </dl>
           <button
@@ -114,8 +117,12 @@
             (click)="resetPassword()"
             [disabled]="saving() || isSelf()"
           >
-            Reset password
+            Send password reset
           </button>
+          @if (currentUser.status === 'PENDING') {
+            <button class="secondary-button full" type="button" (click)="resendInvitation()" [disabled]="saving()">Resend invitation</button>
+          }
+          <button class="secondary-button full" type="button" (click)="resetMfa()" [disabled]="saving() || isSelf()">Reset MFA and sessions</button>
           <button
             class="danger-button full"
             type="button"
@@ -180,32 +187,5 @@
         </section>
       </aside>
     }
-  </div>
-}
-
-@if (temporaryPassword()) {
-  <div class="dialog-backdrop" role="presentation">
-    <section
-      class="password-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="temporary-title"
-    >
-      <p class="eyebrow">Show once</p>
-      <h2 id="temporary-title">Temporary password</h2>
-      <p>
-        Copy this password now and send it through a secure channel. It cannot be retrieved after
-        this dialog closes.
-      </p>
-      <div class="password-value">
-        <code>{{ temporaryPassword() }}</code
-        ><button class="secondary-button" type="button" (click)="copyTemporaryPassword()">
-          {{ copied() ? 'Copied' : 'Copy' }}
-        </button>
-      </div>
-      <button class="primary-button full" type="button" (click)="closeTemporaryPassword()">
-        I saved the password
-      </button>
-    </section>
   </div>
 }

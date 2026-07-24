@@ -29,9 +29,6 @@ export class UserEditorComponent implements OnInit {
   readonly saving = signal(false);
   readonly error = signal('');
   readonly success = signal('');
-  readonly temporaryPassword = signal('');
-  readonly copied = signal(false);
-  readonly createdUserId = signal<string | null>(null);
   readonly auditEvents = signal<UserAuditEvent[]>([]);
   readonly auditPage = signal(0);
   readonly auditTotalPages = signal(0);
@@ -60,22 +57,18 @@ export class UserEditorComponent implements OnInit {
     this.error.set('');
     this.success.set('');
     const payload = this.payload();
-    const request: Observable<AdminUser | { user: AdminUser; temporaryPassword: string }> = this
-      .isNew
+    const request: Observable<AdminUser> = this.isNew
       ? this.api.create(payload)
       : this.api.update(this.id!, { ...payload, version: this.user()!.version });
     request.pipe(finalize(() => this.saving.set(false))).subscribe({
       next: (response) => {
-        if ('temporaryPassword' in response) {
-          this.user.set(response.user);
-          this.createdUserId.set(response.user.id);
-          this.temporaryPassword.set(response.temporaryPassword);
-        } else {
-          this.user.set(response);
-          this.form.patchValue(this.formValue(response));
-          this.success.set('Account details saved.');
-          this.loadAudit(response.id);
-        }
+        this.user.set(response);
+        this.form.patchValue(this.formValue(response));
+        this.success.set(
+          this.isNew ? 'Account created and invitation email queued.' : 'Account details saved.',
+        );
+        if (this.isNew) this.router.navigateByUrl(`/admin/users/${response.id}`);
+        else this.loadAudit(response.id);
       },
       error: (error: HttpErrorResponse) =>
         this.error.set(apiErrorMessage(error, 'The account could not be saved.')),
@@ -96,7 +89,7 @@ export class UserEditorComponent implements OnInit {
   resetPassword(): void {
     const user = this.user();
     if (!user || this.saving()) return;
-    if (!globalThis.confirm(`Generate a temporary password for ${user.displayName}?`)) return;
+    if (!globalThis.confirm(`Send a password recovery email to ${user.displayName}?`)) return;
     this.saving.set(true);
     this.error.set('');
     this.api
@@ -104,27 +97,25 @@ export class UserEditorComponent implements OnInit {
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: (response) => {
-          this.user.set(response.user);
-          this.temporaryPassword.set(response.temporaryPassword);
-          this.loadAudit(response.user.id);
+          this.user.set(response);
+          this.success.set('Password recovery email queued.');
+          this.loadAudit(response.id);
         },
         error: (error: HttpErrorResponse) =>
           this.error.set(apiErrorMessage(error, 'The password could not be reset.')),
       });
   }
 
-  copyTemporaryPassword(): void {
-    const password = this.temporaryPassword();
-    if (!password) return;
-    navigator.clipboard.writeText(password).then(() => this.copied.set(true));
+  resendInvitation(): void {
+    const user = this.user();
+    if (!user) return;
+    this.runAccountAction(this.api.resendInvitation(user), 'Invitation email queued.');
   }
 
-  closeTemporaryPassword(): void {
-    this.temporaryPassword.set('');
-    this.copied.set(false);
-    const createdId = this.createdUserId();
-    this.createdUserId.set(null);
-    if (createdId) this.router.navigateByUrl(`/admin/users/${createdId}`);
+  resetMfa(): void {
+    const user = this.user();
+    if (!user || !globalThis.confirm(`Reset MFA and all sessions for ${user.displayName}?`)) return;
+    this.runAccountAction(this.api.resetMfa(user), 'MFA reset and sessions revoked.');
   }
 
   previousAudit(): void {
@@ -205,7 +196,7 @@ export class UserEditorComponent implements OnInit {
     return {
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email,
+      email: user.pendingEmail ?? user.email,
       jobTitle: user.jobTitle ?? '',
       department: user.department ?? '',
       phoneNumber: user.phoneNumber ?? '',

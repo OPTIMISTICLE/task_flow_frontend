@@ -29,10 +29,11 @@
     </label>
     <label>
       <span>Status</span>
-      <select #activeInput [value]="active() === undefined ? '' : active()">
+      <select #statusInput [value]="status()">
         <option value="">All statuses</option>
-        <option value="true">Active</option>
-        <option value="false">Inactive</option>
+        <option value="PENDING">Pending invitation</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
       </select>
     </label>
     <label>
@@ -50,7 +51,7 @@
     <button
       class="primary-button"
       type="button"
-      (click)="applyFilters(searchInput.value, roleInput.value, activeInput.value, sortInput.value)"
+      (click)="applyFilters(searchInput.value, roleInput.value, statusInput.value, sortInput.value)"
     >
       Apply
     </button>
@@ -90,12 +91,10 @@
             ><small>{{ user.department || 'No department' }}</small>
           </div>
           <div class="status-stack">
-            <span class="account-status" [class.inactive]="!user.active">{{
-              user.active ? 'Active' : 'Inactive'
+            <span class="account-status" [class.inactive]="user.status === 'INACTIVE'">{{
+              user.status === 'PENDING' ? 'Pending' : user.status === 'ACTIVE' ? 'Active' : 'Inactive'
             }}</span>
-            @if (user.mustChangePassword) {
-              <small>Temporary password</small>
-            }
+            @if (user.pendingEmail) { <small>Email change pending</small> }
           </div>
           <span>{{ user.updatedAt | date: 'mediumDate' }}</span>
           <a class="secondary-button" [routerLink]="['/admin/users', user.id]">Manage</a>

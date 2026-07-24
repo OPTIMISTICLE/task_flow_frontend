@@ -12,7 +12,8 @@ describe('TaskListComponent', () => {
   let fixture: ComponentFixture<TaskListComponent>;
   const worker: AuthUser = {
     id: 'worker-id', email: 'worker@company.local', firstName: 'Will', lastName: 'Worker',
-    displayName: 'Will Worker', role: 'WORKER', mustChangePassword: false
+    displayName: 'Will Worker', role: 'WORKER', status: 'ACTIVE', mustChangePassword: false,
+    mfaEnabled: false, sessionId: 'worker-session'
   };
   const task: TaskItem = {
     id: 'task-id', title: 'Prepare report', description: 'Summarize delivery risks.', dueDate: null,

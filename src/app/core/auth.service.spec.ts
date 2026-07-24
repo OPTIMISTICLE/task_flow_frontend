@@ -16,7 +16,10 @@ describe('AuthService', () => {
     lastName: 'Manager',
     displayName: 'Maya Manager',
     role: 'MANAGER',
+    status: 'ACTIVE',
     mustChangePassword: false,
+    mfaEnabled: false,
+    sessionId: 'session-id',
   };
 
   beforeEach(() => {
@@ -33,8 +36,8 @@ describe('AuthService', () => {
   afterEach(() => http.verify());
 
   it('fetches a CSRF token before login and keeps the JWT outside JavaScript', () => {
-    let result: AuthUser | undefined;
-    service.login(manager.email, 'secret').subscribe((user) => (result = user));
+    let result: import('../models/api.models').LoginResponse | undefined;
+    service.login(manager.email, 'secret').subscribe((response) => (result = response));
 
     const csrf = http.expectOne('/api/auth/csrf');
     expect(csrf.request.method).toBe('GET');
@@ -45,9 +48,15 @@ describe('AuthService', () => {
     expect(login.request.method).toBe('POST');
     expect(login.request.withCredentials).toBe(true);
     expect(login.request.body).toEqual({ email: manager.email, password: 'secret' });
-    login.flush(manager);
+    const response = {
+      state: 'AUTHENTICATED' as const,
+      user: manager,
+      challengeToken: null,
+      challengeExpiresAt: null,
+    };
+    login.flush(response);
 
-    expect(result).toEqual(manager);
+    expect(result).toEqual(response);
     expect(service.user()).toEqual(manager);
   });
 

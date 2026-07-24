@@ -5,10 +5,10 @@ import {
   AdminUser,
   AdminUserPage,
   AdminUserPayload,
-  TemporaryPasswordResult,
   UpdateAdminUserPayload,
   UserAuditPage,
   UserRole,
+  UserAccountStatus,
 } from '../models/api.models';
 import { CsrfService } from './csrf.service';
 
@@ -17,7 +17,7 @@ export interface UserDirectoryQuery {
   size: number;
   query?: string;
   role?: UserRole | '';
-  active?: boolean;
+  status?: UserAccountStatus | '';
   sort?: 'name' | 'email' | 'createdAt' | 'updatedAt';
   direction?: 'asc' | 'desc';
 }
@@ -35,7 +35,7 @@ export class UserAdminApiService {
       .set('direction', query.direction ?? 'desc');
     if (query.query) params = params.set('query', query.query);
     if (query.role) params = params.set('role', query.role);
-    if (query.active !== undefined) params = params.set('active', query.active);
+    if (query.status) params = params.set('status', query.status);
     return this.http.get<AdminUserPage>('/api/admin/users', { params });
   }
 
@@ -43,10 +43,8 @@ export class UserAdminApiService {
     return this.http.get<AdminUser>(`/api/admin/users/${id}`);
   }
 
-  create(payload: AdminUserPayload): Observable<TemporaryPasswordResult> {
-    return this.withFreshCsrf(() =>
-      this.http.post<TemporaryPasswordResult>('/api/admin/users', payload),
-    );
+  create(payload: AdminUserPayload): Observable<AdminUser> {
+    return this.withFreshCsrf(() => this.http.post<AdminUser>('/api/admin/users', payload));
   }
 
   update(id: string, payload: UpdateAdminUserPayload): Observable<AdminUser> {
@@ -61,12 +59,20 @@ export class UserAdminApiService {
     return this.action(user, 'deactivate');
   }
 
-  resetPassword(user: AdminUser): Observable<TemporaryPasswordResult> {
+  resetPassword(user: AdminUser): Observable<AdminUser> {
     return this.withFreshCsrf(() =>
-      this.http.post<TemporaryPasswordResult>(`/api/admin/users/${user.id}/reset-password`, {
+      this.http.post<AdminUser>(`/api/admin/users/${user.id}/reset-password`, {
         version: user.version,
       }),
     );
+  }
+
+  resendInvitation(user: AdminUser): Observable<AdminUser> {
+    return this.action(user, 'resend-invitation');
+  }
+
+  resetMfa(user: AdminUser): Observable<AdminUser> {
+    return this.action(user, 'reset-mfa');
   }
 
   audit(id: string, page = 0, size = 20): Observable<UserAuditPage> {
@@ -74,7 +80,10 @@ export class UserAdminApiService {
     return this.http.get<UserAuditPage>(`/api/admin/users/${id}/audit`, { params });
   }
 
-  private action(user: AdminUser, action: 'activate' | 'deactivate'): Observable<AdminUser> {
+  private action(
+    user: AdminUser,
+    action: 'activate' | 'deactivate' | 'resend-invitation' | 'reset-mfa',
+  ): Observable<AdminUser> {
     return this.withFreshCsrf(() =>
       this.http.post<AdminUser>(`/api/admin/users/${user.id}/${action}`, {
         version: user.version,

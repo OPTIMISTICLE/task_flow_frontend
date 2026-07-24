@@ -16,12 +16,15 @@ describe('UserAdminApiService', () => {
     lastName: 'Worker',
     displayName: 'New Worker',
     email: 'new.worker@company.local',
+    pendingEmail: null,
+    emailVerifiedAt: null,
     jobTitle: 'Analyst',
     department: 'Operations',
     phoneNumber: '+14155552671',
     role: 'WORKER',
-    active: true,
-    mustChangePassword: true,
+    status: 'PENDING',
+    active: false,
+    mustChangePassword: false,
     createdAt: '2026-07-24T00:00:00Z',
     updatedAt: '2026-07-24T00:00:00Z',
   };
@@ -40,18 +43,18 @@ describe('UserAdminApiService', () => {
   afterEach(() => http.verify());
 
   it('sends paged directory filters', () => {
-    service.list({ page: 1, size: 20, query: 'worker', role: 'WORKER', active: true }).subscribe();
+    service.list({ page: 1, size: 20, query: 'worker', role: 'WORKER', status: 'PENDING' }).subscribe();
 
     const request = http.expectOne(
       (candidate) => candidate.url === '/api/admin/users' && candidate.params.get('page') === '1',
     );
     expect(request.request.params.get('query')).toBe('worker');
     expect(request.request.params.get('role')).toBe('WORKER');
-    expect(request.request.params.get('active')).toBe('true');
+    expect(request.request.params.get('status')).toBe('PENDING');
     request.flush({ items: [user], page: 1, size: 20, totalElements: 21, totalPages: 2 });
   });
 
-  it('refreshes CSRF before creating an account and exposes the one-time result', () => {
+  it('refreshes CSRF before creating an invited account', () => {
     const payload: AdminUserPayload = {
       firstName: user.firstName,
       lastName: user.lastName,
@@ -61,15 +64,15 @@ describe('UserAdminApiService', () => {
       phoneNumber: user.phoneNumber,
       role: user.role,
     };
-    let password = '';
+    let result: AdminUser | undefined;
 
-    service.create(payload).subscribe((result) => (password = result.temporaryPassword));
+    service.create(payload).subscribe((created) => (result = created));
     http.expectOne('/api/auth/csrf').flush({ headerName: 'X-XSRF-TOKEN' });
     const create = http.expectOne('/api/admin/users');
     expect(create.request.method).toBe('POST');
     expect(create.request.body).toEqual(payload);
-    create.flush({ user, temporaryPassword: 'generated-temporary-password' });
+    create.flush(user);
 
-    expect(password).toBe('generated-temporary-password');
+    expect(result).toEqual(user);
   });
 });

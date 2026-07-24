@@ -1,4 +1,5 @@
 export type UserRole = 'ADMIN' | 'MANAGER' | 'WORKER';
+export type UserAccountStatus = 'PENDING' | 'ACTIVE' | 'INACTIVE';
 export type TaskProgressStatus = 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED';
 export type TaskStatus = TaskProgressStatus | 'OVERDUE';
 
@@ -9,7 +10,17 @@ export interface AuthUser {
   lastName: string;
   displayName: string;
   role: UserRole;
+  status: UserAccountStatus;
   mustChangePassword: boolean;
+  mfaEnabled: boolean;
+  sessionId: string;
+}
+
+export interface LoginResponse extends Partial<AuthUser> {
+  state: 'AUTHENTICATED' | 'PASSWORD_CHANGE_REQUIRED' | 'MFA_REQUIRED';
+  user: AuthUser | null;
+  challengeToken: string | null;
+  challengeExpiresAt: string | null;
 }
 
 export interface PersonSummary {
@@ -74,10 +85,13 @@ export interface AdminUser {
   lastName: string;
   displayName: string;
   email: string;
+  pendingEmail: string | null;
+  emailVerifiedAt: string | null;
   jobTitle: string | null;
   department: string | null;
   phoneNumber: string | null;
   role: UserRole;
+  status: UserAccountStatus;
   active: boolean;
   mustChangePassword: boolean;
   createdAt: string;
@@ -106,9 +120,28 @@ export interface UpdateAdminUserPayload extends AdminUserPayload {
   version: number;
 }
 
-export interface TemporaryPasswordResult {
-  user: AdminUser;
-  temporaryPassword: string;
+export interface AuthSession {
+  id: string;
+  userAgent: string;
+  createdAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  current: boolean;
+  active: boolean;
+}
+
+export interface MfaStatus {
+  enabled: boolean;
+  recoveryCodesRemaining: number;
+}
+
+export interface MfaSetup {
+  secret: string;
+  otpauthUri: string;
+}
+
+export interface RecoveryCodes {
+  recoveryCodes: string[];
 }
 
 export interface UserAuditEvent {

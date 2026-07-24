@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../../core/error-message';
 import { UserAdminApiService } from '../../core/user-admin-api.service';
-import { AdminUser, UserRole } from '../../models/api.models';
+import { AdminUser, UserAccountStatus, UserRole } from '../../models/api.models';
 
 @Component({
   selector: 'app-user-list',
@@ -24,7 +24,7 @@ export class UserListComponent implements OnInit {
   readonly totalElements = signal(0);
   readonly query = signal('');
   readonly role = signal<UserRole | ''>('');
-  readonly active = signal<boolean | undefined>(undefined);
+  readonly status = signal<UserAccountStatus | ''>('');
   readonly sort = signal<'name' | 'email' | 'createdAt' | 'updatedAt'>('createdAt');
   readonly direction = signal<'asc' | 'desc'>('desc');
 
@@ -32,10 +32,10 @@ export class UserListComponent implements OnInit {
     this.load();
   }
 
-  applyFilters(query: string, role: string, active: string, sort: string): void {
+  applyFilters(query: string, role: string, status: string, sort: string): void {
     this.query.set(query.trim());
     this.role.set(role as UserRole | '');
-    this.active.set(active === '' ? undefined : active === 'true');
+    this.status.set(status as UserAccountStatus | '');
     this.sort.set(sort as 'name' | 'email' | 'createdAt' | 'updatedAt');
     this.page.set(0);
     this.load();
@@ -71,7 +71,7 @@ export class UserListComponent implements OnInit {
         size: 20,
         query: this.query(),
         role: this.role(),
-        active: this.active(),
+        status: this.status(),
         sort: this.sort(),
         direction: this.direction(),
       })

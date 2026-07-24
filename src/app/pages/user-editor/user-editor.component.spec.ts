@@ -19,7 +19,10 @@ describe('UserEditorComponent', () => {
     lastName: 'Administrator',
     displayName: 'Ada Administrator',
     role: 'ADMIN',
+    status: 'ACTIVE',
     mustChangePassword: false,
+    mfaEnabled: false,
+    sessionId: 'admin-session',
   };
   const createdUser: AdminUser = {
     id: 'new-user-id',
@@ -28,17 +31,20 @@ describe('UserEditorComponent', () => {
     lastName: 'Worker',
     displayName: 'Will Worker',
     email: 'worker@company.local',
+    pendingEmail: null,
+    emailVerifiedAt: null,
     jobTitle: null,
     department: null,
     phoneNumber: null,
     role: 'WORKER',
-    active: true,
-    mustChangePassword: true,
+    status: 'PENDING',
+    active: false,
+    mustChangePassword: false,
     createdAt: '2026-07-24T08:00:00Z',
     updatedAt: '2026-07-24T08:00:00Z',
   };
   const api = {
-    create: vi.fn(() => of({ user: createdUser, temporaryPassword: 'generated-password' })),
+    create: vi.fn(() => of(createdUser)),
   };
   const auth = { user: signal<AuthUser | null>(admin).asReadonly() };
   const router = { navigateByUrl: vi.fn() };
@@ -61,7 +67,7 @@ describe('UserEditorComponent', () => {
     fixture.detectChanges();
   });
 
-  it('creates an account and displays its one-time temporary password', () => {
+  it('creates an account and sends the administrator to its detail page', () => {
     component.form.setValue({
       firstName: 'Will',
       lastName: 'Worker',
@@ -78,17 +84,6 @@ describe('UserEditorComponent', () => {
     expect(api.create).toHaveBeenCalledWith(
       expect.objectContaining({ email: 'WORKER@company.local', role: 'WORKER' }),
     );
-    expect(component.temporaryPassword()).toBe('generated-password');
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Show once');
-  });
-
-  it('navigates to the created account after the password is acknowledged', () => {
-    component.createdUserId.set('new-user-id');
-    component.temporaryPassword.set('generated-password');
-
-    component.closeTemporaryPassword();
-
-    expect(component.temporaryPassword()).toBe('');
     expect(router.navigateByUrl).toHaveBeenCalledWith('/admin/users/new-user-id');
   });
 });

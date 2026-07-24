@@ -1,0 +1,43 @@
+<section class="page-heading"><div><p class="eyebrow">Account</p><h1>Security settings</h1>
+  <p>Protect your sign-in and control active devices.</p></div></section>
+@if (error()) { <div class="alert error">{{ error() }}</div> }
+@if (success()) { <div class="alert success">{{ success() }}</div> }
+<div class="security-grid">
+  <section class="security-card"><h2>Authenticator MFA</h2>
+    <p>{{ status().enabled ? 'Enabled' : 'Not enabled' }} · {{ status().recoveryCodesRemaining }} recovery codes remaining</p>
+    @if (!status().enabled) {
+      <form [formGroup]="setupForm">
+        <label>Current password<input type="password" formControlName="currentPassword" /></label>
+        @if (!setup()) { <button class="primary-button" type="button" (click)="startMfa()" [disabled]="busy()">Start setup</button> }
+        @if (setup(); as value) {
+          <div class="secret"><strong>Manual setup key</strong><code>{{ value.secret }}</code></div>
+          <label>Six-digit code<input formControlName="code" autocomplete="one-time-code" maxlength="6" /></label>
+          <button class="primary-button" type="button" (click)="confirmMfa()" [disabled]="busy()">Enable MFA</button>
+        }
+      </form>
+    } @else {
+      <form [formGroup]="sensitiveForm">
+        <label>Current password<input type="password" formControlName="currentPassword" /></label>
+        <label>Authenticator or recovery code<input formControlName="code" /></label>
+        <div class="actions"><button class="secondary-button" type="button" (click)="regenerate()">New recovery codes</button>
+        <button class="danger-button" type="button" (click)="disableMfa()">Disable MFA</button></div>
+      </form>
+    }
+    @if (recoveryCodes().length) {
+      <div class="recovery"><strong>Recovery codes — save them now</strong>
+        @for (code of recoveryCodes(); track code) { <code>{{ code }}</code> }
+      </div>
+    }
+  </section>
+  <section class="security-card"><div class="card-heading"><div><h2>Sessions</h2><p>Sessions expire after one workday.</p></div>
+    <button class="secondary-button" type="button" (click)="revokeOthers()">Revoke others</button></div>
+    <div class="session-list">@for (session of sessions(); track session.id) {
+      <article [class.inactive]="!session.active"><div><strong>{{ session.userAgent }}</strong>
+        <small>Last seen {{ session.lastSeenAt | date: 'medium' }} · Expires {{ session.expiresAt | date: 'medium' }}</small></div>
+        @if (session.current) { <span class="account-status">Current</span> }
+        @else if (session.active) { <button class="ghost-button" type="button" (click)="revoke(session)">Revoke</button> }
+        @else { <span class="account-status inactive">Revoked</span> }
+      </article>
+    }</div>
+  </section>
+</div>

@@ -19,12 +19,15 @@ describe('UserListComponent', () => {
         lastName: 'Worker',
         displayName: 'Will Worker',
         email: 'worker@company.local',
+        pendingEmail: null,
+        emailVerifiedAt: null,
         jobTitle: 'Analyst',
         department: 'Operations',
         phoneNumber: null,
         role: 'WORKER',
-        active: true,
-        mustChangePassword: true,
+        status: 'PENDING',
+        active: false,
+        mustChangePassword: false,
         createdAt: '2026-07-24T08:00:00Z',
         updatedAt: '2026-07-24T08:00:00Z',
       },
@@ -47,22 +50,22 @@ describe('UserListComponent', () => {
     fixture.detectChanges();
   });
 
-  it('loads the paged directory and shows credential state', () => {
+  it('loads the paged directory and shows invitation state', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(api.list).toHaveBeenCalledWith(expect.objectContaining({ page: 0, size: 20 }));
     expect(element.textContent).toContain('Will Worker');
-    expect(element.textContent).toContain('Temporary password');
+    expect(element.textContent).toContain('Pending');
   });
 
   it('applies server-side role and status filters', () => {
-    component.applyFilters('Will', 'WORKER', 'true', 'name');
+    component.applyFilters('Will', 'WORKER', 'PENDING', 'name');
 
     expect(api.list).toHaveBeenLastCalledWith(
       expect.objectContaining({
         query: 'Will',
         role: 'WORKER',
-        active: true,
+        status: 'PENDING',
         sort: 'name',
         page: 0,
       }),

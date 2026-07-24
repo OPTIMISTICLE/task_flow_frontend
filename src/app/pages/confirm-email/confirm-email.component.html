@@ -1,0 +1,7 @@
+<main class="identity-page"><app-theme-toggle /><section class="identity-card">
+  <p class="eyebrow">Email security</p><h1>Confirm email address</h1>
+  @if (loading()) { <div class="loading-state"><span class="spinner"></span> Confirming…</div> }
+  @if (message()) { <div class="alert success">{{ message() }}</div> }
+  @if (error()) { <div class="alert error">{{ error() }}</div> }
+  @if (!loading()) { <a class="primary-button full" routerLink="/login">Continue to sign in</a> }
+</section></main>
