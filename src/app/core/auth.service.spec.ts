@@ -15,15 +15,16 @@ describe('AuthService', () => {
     firstName: 'Maya',
     lastName: 'Manager',
     displayName: 'Maya Manager',
-    role: 'MANAGER'
+    role: 'MANAGER',
+    mustChangePassword: false,
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([credentialsInterceptor])),
-        provideHttpClientTesting()
-      ]
+        provideHttpClientTesting(),
+      ],
     });
     service = TestBed.inject(AuthService);
     http = TestBed.inject(HttpTestingController);
@@ -54,12 +55,38 @@ describe('AuthService', () => {
     let result: AuthUser | null | undefined;
     service.ensureSession().subscribe((user) => (result = user));
 
-    http.expectOne('/api/auth/me').flush(
-      { title: 'Authentication required' },
-      { status: 401, statusText: 'Unauthorized' }
-    );
+    http
+      .expectOne('/api/auth/me')
+      .flush({ title: 'Authentication required' }, { status: 401, statusText: 'Unauthorized' });
 
     expect(result).toBeNull();
     expect(service.user()).toBeNull();
+  });
+
+  it('refreshes CSRF and replaces the current user after a password change', () => {
+    const changed = { ...manager, mustChangePassword: false };
+    let result: AuthUser | undefined;
+
+    service.changePassword('temporary password', 'a new private passphrase').subscribe((user) => {
+      result = user;
+    });
+
+    http.expectOne('/api/auth/csrf').flush({ headerName: 'X-XSRF-TOKEN' });
+    const request = http.expectOne('/api/auth/change-password');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      currentPassword: 'temporary password',
+      newPassword: 'a new private passphrase',
+    });
+    request.flush(changed);
+
+    expect(result).toEqual(changed);
+    expect(service.user()).toEqual(changed);
+  });
+
+  it('selects a role-aware home page and prioritizes a required password change', () => {
+    expect(service.homeUrl({ ...manager, role: 'ADMIN' })).toBe('/admin/users');
+    expect(service.homeUrl({ ...manager, mustChangePassword: true })).toBe('/change-password');
+    expect(service.homeUrl(manager)).toBe('/tasks');
   });
 });

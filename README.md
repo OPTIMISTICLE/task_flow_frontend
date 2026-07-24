@@ -1,8 +1,8 @@
 # TaskFlow frontend and user guide
 
-TaskFlow is a focused task-management workspace for one company. Managers create and assign work,
-while workers see their own assignments, start them, and mark them complete. Everyone gets a clear
-view of deadlines, progress, overdue work, and authorized attachments.
+TaskFlow is a focused task-management workspace for one company. Administrators manage accounts,
+managers create and assign work, and workers see their own assignments, start them, and mark them
+complete. Everyone gets a role-appropriate view of the system.
 
 This directory contains the Angular application. Backend development and deployment are documented
 in [`../backend/README.md`](../backend/README.md).
@@ -11,8 +11,10 @@ in [`../backend/README.md`](../backend/README.md).
 
 ### Roles
 
-TaskFlow has two roles:
+TaskFlow has three roles:
 
+- **Administrator:** creates and maintains user accounts, resets passwords, activates or deactivates
+  accounts, and reviews account audit activity. Administrators do not see task data.
 - **Manager:** creates tasks, selects the responsible worker, follows progress, and accesses task
   attachments.
 - **Worker:** sees only assigned tasks, updates their progress, and accesses task attachments.
@@ -25,6 +27,10 @@ only authorization check.
 1. Open the TaskFlow URL supplied by your administrator.
 2. Enter your company email and password.
 3. Select **Sign in**.
+
+If the account has a bootstrap or administrator-generated temporary password, TaskFlow opens the
+password-change screen. Enter the temporary password, choose a new password of 15 to 200 characters,
+and confirm it. No task or administration page is available until this step is complete.
 
 Demo installations can provide these seeded accounts:
 
@@ -39,6 +45,9 @@ authentication fails, check the email and password and ask the administrator whe
 were enabled.
 
 Use **Sign out** in the top-right account area when finished.
+
+Any signed-in user can choose **Change password** from the navigation. Changing a password invalidates
+older sessions for that account, including sessions on other browsers.
 
 ### Navigate the workspace
 
@@ -74,6 +83,38 @@ deadline, effective status, and attachment count. Open a task to see its descrip
 timestamps, and attachments.
 
 Managers monitor progress but do not change the worker's progress status.
+
+### Administrator workflow
+
+#### Find and review users
+
+1. Select **Users** in the navigation.
+2. Search by name, email, job title, or department.
+3. Optionally filter by role or active state and move through the paged results.
+4. Select a user to edit their profile or review their audit timeline.
+
+The optional profile fields are job title, department, and phone number. Phone numbers must use E.164
+format, such as `+14155552671`.
+
+#### Create an account
+
+1. Select **Create user**.
+2. Enter the user's name and company email, optional profile fields, and role.
+3. Save the account.
+4. Copy the generated temporary password from the one-time dialog and deliver it through an approved
+   private channel.
+
+The password cannot be viewed again. The new user must replace it at first sign-in.
+
+#### Maintain an account
+
+From the user details page an administrator can update profile information, change a role when the
+account has no task or attachment history, reset another user's password, and deactivate or reactivate
+an account. Deactivation is blocked while a manager or worker has unfinished role-related tasks.
+
+For continuity and safety, administrators cannot deactivate, demote, or reset their own account, and
+the last active administrator cannot be changed or deactivated. Accounts are deactivated rather than
+deleted so audit and task history remain intact.
 
 ### Worker workflow
 
@@ -117,6 +158,11 @@ private keys, or unrelated sensitive information.
   administrator.
 - **Invalid email or password:** re-enter the credentials or request a password reset/change from the
   administrator.
+- **Password change required:** finish the password-change screen using the current temporary password.
+- **Account changed since it was loaded:** refresh the user details before retrying the administrator
+  action; another administrator changed it first.
+- **Role or deactivation blocked:** resolve the task-history or unfinished-work condition shown by the
+  API, or use another active administrator for self-protected actions.
 - **Request could not be completed:** the backend may be starting, unavailable, or rejecting the
   request. Wait briefly and retry once.
 - **Not allowed to perform this operation:** confirm that you are the task's creating manager or
@@ -148,12 +194,16 @@ the separate CSRF cookie and sends the corresponding header for protected mutati
 
 ### Main routes
 
-| Route        | Purpose                      | Access                       |
-| ------------ | ---------------------------- | ---------------------------- |
-| `/login`     | Sign-in screen               | Public                       |
-| `/tasks`     | Role-specific task dashboard | Authenticated                |
-| `/tasks/new` | Create and assign a task     | Manager                      |
-| `/tasks/:id` | Task details and attachments | Authorized manager or worker |
+| Route              | Purpose                      | Access                       |
+| ------------------ | ---------------------------- | ---------------------------- |
+| `/login`           | Sign-in screen               | Public                       |
+| `/change-password` | Replace the current password | Authenticated                |
+| `/admin/users`     | Search and filter users      | Administrator                |
+| `/admin/users/new` | Create a user                | Administrator                |
+| `/admin/users/:id` | Edit and audit a user        | Administrator                |
+| `/tasks`           | Role-specific task dashboard | Manager or worker            |
+| `/tasks/new`       | Create and assign a task     | Manager                      |
+| `/tasks/:id`       | Task details and attachments | Authorized manager or worker |
 
 Unknown routes return to the application entry route.
 

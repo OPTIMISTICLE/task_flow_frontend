@@ -5,27 +5,24 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
 import { apiErrorMessage } from '../../core/error-message';
-import { ThemeToggleComponent } from '../../shared/theme-toggle/theme-toggle.component';
 
 @Component({
-  selector: 'app-login',
-  imports: [ReactiveFormsModule, ThemeToggleComponent],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss',
+  selector: 'app-change-password',
+  imports: [ReactiveFormsModule],
+  templateUrl: './change-password.component.html',
+  styleUrl: './change-password.component.scss',
 })
-export class LoginComponent {
+export class ChangePasswordComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
   readonly error = signal('');
   readonly form = this.fb.nonNullable.group({
-    email: [
-      'manager@company.local',
-      [Validators.required, Validators.email, Validators.maxLength(254)],
-    ],
-    password: ['', [Validators.required, Validators.maxLength(200)]],
+    currentPassword: ['', [Validators.required, Validators.maxLength(200)]],
+    newPassword: ['', [Validators.required, Validators.minLength(15), Validators.maxLength(200)]],
+    confirmPassword: ['', [Validators.required, Validators.maxLength(200)]],
   });
 
   submit(): void {
@@ -33,21 +30,20 @@ export class LoginComponent {
       this.form.markAllAsTouched();
       return;
     }
+    const { currentPassword, newPassword, confirmPassword } = this.form.getRawValue();
+    if (newPassword !== confirmPassword) {
+      this.error.set('The new password and confirmation do not match.');
+      return;
+    }
     this.loading.set(true);
     this.error.set('');
-    const { email, password } = this.form.getRawValue();
     this.auth
-      .login(email.trim(), password)
+      .changePassword(currentPassword, newPassword)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (user) => this.router.navigateByUrl(this.auth.homeUrl(user)),
         error: (error: HttpErrorResponse) =>
-          this.error.set(
-            apiErrorMessage(
-              error,
-              'Sign-in failed. Check that the backend is running and the Angular development proxy is enabled.',
-            ),
-          ),
+          this.error.set(apiErrorMessage(error, 'The password could not be changed.')),
       });
   }
 }

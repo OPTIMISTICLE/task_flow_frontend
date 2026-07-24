@@ -14,6 +14,10 @@ export class AuthService {
 
   readonly user = this.currentUserSignal.asReadonly();
   readonly isManager = computed(() => this.currentUserSignal()?.role === 'MANAGER');
+  readonly isAdmin = computed(() => this.currentUserSignal()?.role === 'ADMIN');
+  readonly mustChangePassword = computed(
+    () => this.currentUserSignal()?.mustChangePassword === true,
+  );
 
   ensureSession(): Observable<AuthUser | null> {
     if (this.sessionLoaded) {
@@ -55,5 +59,23 @@ export class AuthService {
         this.sessionLoaded = true;
       }),
     );
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<AuthUser> {
+    return this.csrf.refresh().pipe(
+      switchMap(() =>
+        this.http.post<AuthUser>('/api/auth/change-password', { currentPassword, newPassword }),
+      ),
+      tap((user) => {
+        this.currentUserSignal.set(user);
+        this.sessionLoaded = true;
+      }),
+    );
+  }
+
+  homeUrl(user: AuthUser | null = this.currentUserSignal()): string {
+    if (!user) return '/login';
+    if (user.mustChangePassword) return '/change-password';
+    return user.role === 'ADMIN' ? '/admin/users' : '/tasks';
   }
 }

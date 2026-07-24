@@ -1,0 +1,211 @@
+<a class="back-link" routerLink="/admin/users">← Back to users</a>
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Administration</p>
+    <h1>{{ isNew ? 'Create a user' : 'Manage user' }}</h1>
+    <p>
+      {{
+        isNew
+          ? 'Create a secured account with a one-time temporary password.'
+          : 'Update identity, access, and credentials.'
+      }}
+    </p>
+  </div>
+  @if (!isNew && user(); as currentUser) {
+    <span class="account-status" [class.inactive]="!currentUser.active">{{
+      currentUser.active ? 'Active' : 'Inactive'
+    }}</span>
+  }
+</section>
+
+@if (error()) {
+  <div class="alert error" role="alert">{{ error() }}</div>
+}
+@if (success()) {
+  <div class="alert success" role="status">{{ success() }}</div>
+}
+
+@if (loading()) {
+  <div class="loading-state"><span class="spinner"></span> Loading account…</div>
+} @else {
+  <div class="editor-grid">
+    <form class="form-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="form-heading">
+        <span>01</span>
+        <div>
+          <h2>Identity</h2>
+          <p>Names and sign-in address.</p>
+        </div>
+      </div>
+      <div class="fields two-columns">
+        <label>First name <b>*</b><input formControlName="firstName" maxlength="100" /></label>
+        <label>Last name <b>*</b><input formControlName="lastName" maxlength="100" /></label>
+      </div>
+      <label
+        >Email <b>*</b
+        ><input type="email" formControlName="email" maxlength="254" autocomplete="off"
+      /></label>
+
+      <div class="form-heading">
+        <span>02</span>
+        <div>
+          <h2>Job details</h2>
+          <p>Optional company profile information.</p>
+        </div>
+      </div>
+      <div class="fields two-columns">
+        <label>Job title<input formControlName="jobTitle" maxlength="120" /></label>
+        <label>Department<input formControlName="department" maxlength="120" /></label>
+      </div>
+      <label>Phone number<input formControlName="phoneNumber" placeholder="+14155552671" /></label>
+      @if (form.controls.phoneNumber.touched && form.controls.phoneNumber.invalid) {
+        <small class="field-error">Use international E.164 format, for example +14155552671.</small>
+      }
+
+      <div class="form-heading">
+        <span>03</span>
+        <div>
+          <h2>Access</h2>
+          <p>Choose the account's responsibility.</p>
+        </div>
+      </div>
+      <label
+        >Role <b>*</b>
+        <select formControlName="role" [attr.disabled]="isSelf() ? true : null">
+          <option value="ADMIN">Administrator</option>
+          <option value="MANAGER">Manager</option>
+          <option value="WORKER">Worker</option>
+        </select>
+      </label>
+      @if (isSelf()) {
+        <small class="hint">Your own administrator role cannot be changed.</small>
+      }
+
+      <footer>
+        <a class="secondary-button" routerLink="/admin/users">Cancel</a>
+        <button class="primary-button" type="submit" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : isNew ? 'Create user' : 'Save changes' }}
+        </button>
+      </footer>
+    </form>
+
+    @if (!isNew && user(); as currentUser) {
+      <aside class="side-column">
+        <section class="account-card">
+          <h2>Account controls</h2>
+          <dl>
+            <div>
+              <dt>Created</dt>
+              <dd>{{ currentUser.createdAt | date: 'medium' }}</dd>
+            </div>
+            <div>
+              <dt>Updated</dt>
+              <dd>{{ currentUser.updatedAt | date: 'medium' }}</dd>
+            </div>
+            <div>
+              <dt>Credentials</dt>
+              <dd>{{ currentUser.mustChangePassword ? 'Temporary password' : 'Established' }}</dd>
+            </div>
+          </dl>
+          <button
+            class="secondary-button full"
+            type="button"
+            (click)="resetPassword()"
+            [disabled]="saving() || isSelf()"
+          >
+            Reset password
+          </button>
+          <button
+            class="danger-button full"
+            type="button"
+            (click)="changeActive()"
+            [disabled]="saving() || isSelf()"
+          >
+            {{ currentUser.active ? 'Deactivate account' : 'Reactivate account' }}
+          </button>
+          @if (isSelf()) {
+            <small
+              >Use Change password for your own credentials. Your own account cannot be deactivated
+              here.</small
+            >
+          }
+        </section>
+
+        <section class="audit-card">
+          <div class="audit-heading">
+            <h2>Security timeline</h2>
+            <small
+              >{{ auditEvents().length }} event{{ auditEvents().length === 1 ? '' : 's' }}</small
+            >
+          </div>
+          @if (auditEvents().length === 0) {
+            <p class="muted">No account events recorded.</p>
+          } @else {
+            <div class="audit-list">
+              @for (event of auditEvents(); track event.id) {
+                <article>
+                  <span [class.failure]="event.outcome !== 'SUCCESS'"></span>
+                  <div>
+                    <strong>{{ auditLabel(event.action) }}</strong
+                    ><small
+                      >{{ event.occurredAt | date: 'medium' }} ·
+                      {{ event.actorEmail || 'System' }}</small
+                    >
+                    <p>{{ event.details }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+          <footer class="audit-pages">
+            <button
+              type="button"
+              class="ghost-button"
+              (click)="previousAudit()"
+              [disabled]="auditPage() === 0"
+            >
+              Previous
+            </button>
+            <span>{{ auditPage() + 1 }} / {{ auditTotalPages() || 1 }}</span>
+            <button
+              type="button"
+              class="ghost-button"
+              (click)="nextAudit()"
+              [disabled]="auditPage() + 1 >= auditTotalPages()"
+            >
+              Next
+            </button>
+          </footer>
+        </section>
+      </aside>
+    }
+  </div>
+}
+
+@if (temporaryPassword()) {
+  <div class="dialog-backdrop" role="presentation">
+    <section
+      class="password-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="temporary-title"
+    >
+      <p class="eyebrow">Show once</p>
+      <h2 id="temporary-title">Temporary password</h2>
+      <p>
+        Copy this password now and send it through a secure channel. It cannot be retrieved after
+        this dialog closes.
+      </p>
+      <div class="password-value">
+        <code>{{ temporaryPassword() }}</code
+        ><button class="secondary-button" type="button" (click)="copyTemporaryPassword()">
+          {{ copied() ? 'Copied' : 'Copy' }}
+        </button>
+      </div>
+      <button class="primary-button full" type="button" (click)="closeTemporaryPassword()">
+        I saved the password
+      </button>
+    </section>
+  </div>
+}

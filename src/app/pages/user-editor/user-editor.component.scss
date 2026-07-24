@@ -1,0 +1,313 @@
+:host {
+  display: block;
+  width: min(1160px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 30px 0 70px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+.back-link:hover {
+  color: var(--primary);
+}
+.page-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.page-heading h1 {
+  margin: 7px 0;
+  font-size: clamp(30px, 4vw, 44px);
+}
+.page-heading p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+.account-status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--success);
+  background: var(--completed-background);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+.account-status.inactive {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+}
+.alert {
+  margin-bottom: 18px;
+}
+.alert.success {
+  color: var(--success);
+  background: var(--completed-background);
+  border: 1px solid color-mix(in srgb, var(--success) 35%, transparent);
+}
+.loading-state {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 80px;
+  color: var(--muted);
+}
+.editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.8fr);
+  gap: 22px;
+  align-items: start;
+}
+.form-card,
+.account-card,
+.audit-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-texture);
+  box-shadow: var(--shadow-xs);
+}
+.form-card {
+  display: grid;
+  gap: 10px;
+  padding: 28px;
+}
+.form-heading {
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  margin: 16px 0 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.form-heading:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border: 0;
+}
+.form-heading > span {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: 10px;
+  font-weight: 900;
+}
+.form-heading h2 {
+  margin: 0 0 3px;
+  font-size: 18px;
+}
+.form-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+label {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 760;
+}
+label b {
+  color: var(--danger);
+}
+.fields.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.hint {
+  color: var(--muted);
+}
+.form-card footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.side-column {
+  display: grid;
+  gap: 22px;
+}
+.account-card,
+.audit-card {
+  padding: 22px;
+}
+.account-card h2,
+.audit-card h2 {
+  margin: 0;
+  font-size: 17px;
+}
+dl {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+dl div {
+  display: grid;
+  gap: 3px;
+}
+dt {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+dd {
+  margin: 0;
+  font-size: 13px;
+}
+.full {
+  width: 100%;
+  margin-top: 9px;
+}
+.danger-button {
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 1px solid color-mix(in srgb, var(--danger) 38%, transparent);
+  border-radius: 9px;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 9%, var(--surface-elevated));
+  font-weight: 780;
+  cursor: pointer;
+}
+.danger-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.account-card > small {
+  display: block;
+  margin-top: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.audit-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.audit-heading small,
+.muted {
+  color: var(--muted);
+}
+.audit-list {
+  margin-top: 18px;
+}
+.audit-list article {
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.audit-list article > span {
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--success);
+}
+.audit-list article > span.failure {
+  background: var(--danger);
+}
+.audit-list strong {
+  display: block;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+.audit-list small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.audit-list p {
+  margin: 5px 0 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+}
+.audit-pages {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(5px);
+}
+.password-dialog {
+  width: min(100%, 530px);
+  padding: 30px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-sm);
+}
+.password-dialog h2 {
+  margin: 8px 0;
+  font-size: 28px;
+}
+.password-dialog > p:not(.eyebrow) {
+  color: var(--muted);
+  line-height: 1.55;
+}
+.password-value {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 22px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-muted);
+}
+.password-value code {
+  flex: 1;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+@media (max-width: 850px) {
+  .editor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  :host {
+    width: calc(100% - 24px);
+  }
+  .page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .fields.two-columns {
+    grid-template-columns: 1fr;
+  }
+  .form-card {
+    padding: 20px;
+  }
+  .password-value {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

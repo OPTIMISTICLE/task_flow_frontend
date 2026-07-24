@@ -18,12 +18,15 @@ describe('LoginComponent', () => {
     lastName: 'Manager',
     displayName: 'Maya Manager',
     role: 'MANAGER',
+    mustChangePassword: false,
   };
-  const auth = { login: vi.fn() };
+  const auth = { login: vi.fn(), homeUrl: vi.fn() };
   const router = { navigateByUrl: vi.fn() };
 
   beforeEach(async () => {
     auth.login.mockReset();
+    auth.homeUrl.mockReset();
+    auth.homeUrl.mockReturnValue('/tasks');
     router.navigateByUrl.mockReset();
     router.navigateByUrl.mockResolvedValue(true);
 

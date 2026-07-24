@@ -1,4 +1,4 @@
-export type UserRole = 'MANAGER' | 'WORKER';
+export type UserRole = 'ADMIN' | 'MANAGER' | 'WORKER';
 export type TaskProgressStatus = 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED';
 export type TaskStatus = TaskProgressStatus | 'OVERDUE';
 
@@ -9,6 +9,7 @@ export interface AuthUser {
   lastName: string;
   displayName: string;
   role: UserRole;
+  mustChangePassword: boolean;
 }
 
 export interface PersonSummary {
@@ -63,4 +64,66 @@ export interface ApiProblem {
   status?: number;
   detail?: string;
   fieldErrors?: Record<string, string>;
+  code?: string;
+}
+
+export interface AdminUser {
+  id: string;
+  version: number;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  email: string;
+  jobTitle: string | null;
+  department: string | null;
+  phoneNumber: string | null;
+  role: UserRole;
+  active: boolean;
+  mustChangePassword: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminUserPage {
+  items: AdminUser[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface AdminUserPayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  jobTitle: string | null;
+  department: string | null;
+  phoneNumber: string | null;
+  role: UserRole;
+}
+
+export interface UpdateAdminUserPayload extends AdminUserPayload {
+  version: number;
+}
+
+export interface TemporaryPasswordResult {
+  user: AdminUser;
+  temporaryPassword: string;
+}
+
+export interface UserAuditEvent {
+  id: string;
+  actorEmail: string | null;
+  action: string;
+  outcome: string;
+  details: string | null;
+  occurredAt: string;
+}
+
+export interface UserAuditPage {
+  items: UserAuditEvent[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }

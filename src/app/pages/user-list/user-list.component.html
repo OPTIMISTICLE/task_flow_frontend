@@ -1,0 +1,121 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Administration</p>
+    <h1>User directory</h1>
+    <p>Create accounts, control access, and review credential state.</p>
+  </div>
+  <a class="primary-button" routerLink="/admin/users/new">+ Create user</a>
+</section>
+
+<section class="directory-card">
+  <div class="filters">
+    <label>
+      <span>Search</span>
+      <input
+        #searchInput
+        type="search"
+        [value]="query()"
+        placeholder="Name, email, job, or department"
+      />
+    </label>
+    <label>
+      <span>Role</span>
+      <select #roleInput [value]="role()">
+        <option value="">All roles</option>
+        <option value="ADMIN">Administrator</option>
+        <option value="MANAGER">Manager</option>
+        <option value="WORKER">Worker</option>
+      </select>
+    </label>
+    <label>
+      <span>Status</span>
+      <select #activeInput [value]="active() === undefined ? '' : active()">
+        <option value="">All statuses</option>
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
+    </label>
+    <label>
+      <span>Sort</span>
+      <select #sortInput [value]="sort()">
+        <option value="createdAt">Created</option>
+        <option value="updatedAt">Updated</option>
+        <option value="name">Name</option>
+        <option value="email">Email</option>
+      </select>
+    </label>
+    <button class="secondary-button" type="button" (click)="changeDirection()">
+      {{ direction() === 'asc' ? 'Ascending ↑' : 'Descending ↓' }}
+    </button>
+    <button
+      class="primary-button"
+      type="button"
+      (click)="applyFilters(searchInput.value, roleInput.value, activeInput.value, sortInput.value)"
+    >
+      Apply
+    </button>
+  </div>
+
+  <div class="directory-summary">
+    <strong>{{ totalElements() }}</strong> account{{ totalElements() === 1 ? '' : 's' }}
+  </div>
+
+  @if (error()) {
+    <div class="alert error" role="alert">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner"></span> Loading users…</div>
+  } @else if (users().length === 0) {
+    <div class="empty-state">
+      <span>◇</span>
+      <h3>No users found</h3>
+      <p>Change the filters or create an account.</p>
+    </div>
+  } @else {
+    <div class="user-table" role="table" aria-label="User directory">
+      <div class="table-row table-head" role="row">
+        <span>User</span><span>Role</span><span>Job</span><span>Status</span><span>Updated</span
+        ><span></span>
+      </div>
+      @for (user of users(); track user.id) {
+        <div class="table-row" role="row">
+          <div class="identity">
+            <strong>{{ user.displayName }}</strong
+            ><small>{{ user.email }}</small>
+          </div>
+          <span class="role-badge">{{ roleLabel(user.role) }}</span>
+          <div class="job">
+            <span>{{ user.jobTitle || '—' }}</span
+            ><small>{{ user.department || 'No department' }}</small>
+          </div>
+          <div class="status-stack">
+            <span class="account-status" [class.inactive]="!user.active">{{
+              user.active ? 'Active' : 'Inactive'
+            }}</span>
+            @if (user.mustChangePassword) {
+              <small>Temporary password</small>
+            }
+          </div>
+          <span>{{ user.updatedAt | date: 'mediumDate' }}</span>
+          <a class="secondary-button" [routerLink]="['/admin/users', user.id]">Manage</a>
+        </div>
+      }
+    </div>
+  }
+
+  <footer class="pagination">
+    <button class="secondary-button" type="button" (click)="previous()" [disabled]="page() === 0">
+      Previous
+    </button>
+    <span>Page {{ totalPages() ? page() + 1 : 0 }} of {{ totalPages() }}</span>
+    <button
+      class="secondary-button"
+      type="button"
+      (click)="next()"
+      [disabled]="page() + 1 >= totalPages()"
+    >
+      Next
+    </button>
+  </footer>
+</section>

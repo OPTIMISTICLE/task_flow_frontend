@@ -6,10 +6,17 @@
     </a>
 
     <nav aria-label="Main navigation">
-      <a routerLink="/tasks" routerLinkActive="active">Tasks</a>
-      @if (auth.isManager()) {
-        <a routerLink="/tasks/new" routerLinkActive="active">Create task</a>
+      @if (!auth.mustChangePassword()) {
+        @if (auth.isAdmin()) {
+          <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+        } @else {
+          <a routerLink="/tasks" routerLinkActive="active">Tasks</a>
+          @if (auth.isManager()) {
+            <a routerLink="/tasks/new" routerLinkActive="active">Create task</a>
+          }
+        }
       }
+      <a routerLink="/change-password" routerLinkActive="active">Change password</a>
     </nav>
 
     <div class="account">
@@ -19,7 +26,13 @@
       >
       <span class="account-copy">
         <strong>{{ auth.user()?.displayName }}</strong>
-        <small>{{ auth.user()?.role === 'MANAGER' ? 'Manager' : 'Worker' }}</small>
+        <small>{{
+          auth.user()?.role === 'ADMIN'
+            ? 'Administrator'
+            : auth.user()?.role === 'MANAGER'
+              ? 'Manager'
+              : 'Worker'
+        }}</small>
       </span>
       <button class="ghost-button" type="button" (click)="logout()" [disabled]="loggingOut()">
         {{ loggingOut() ? 'Signing out…' : 'Sign out' }}
